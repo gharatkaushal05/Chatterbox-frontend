@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import AppLayout from "../components/layout/AppLayout";
-import { IconButton, Stack } from "@mui/material";
+import { IconButton, Skeleton, Stack } from "@mui/material";
 import { grayColor, orange } from "../constants/color";
 import {
   AttachFile as AttachFileIcon,
@@ -10,15 +10,38 @@ import { InputBox } from "../components/styles/StyledComponents";
 import FileMenu from "../components/dialogs/FileMenu";
 import { sampleMessage } from "../constants/sampleData";
 import MessageComponent from "../components/shared/MessageComponent";
+import { getSocket } from "../socket";
+import {NEW_MESSAGE} from "../constants/events"
+import { useChatDetailsQuery } from "../redux/api/api";
 
 const user = {
   _id: "sdsjakja",
   name: "Kaushal Gharat"
 }
-const  Chat = () => {
+const  Chat = ({chatId}) => {
   const containerRef = useRef(null);
+
+  const socket = getSocket();
+ const chatDetails = useChatDetailsQuery({chatId, skip: !chatId})
+
+  const [message, setMessage] = useState("")
+  const members = chatDetails?.data?.chat?.members
+ 
   
-  return (
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+
+    if(!message.trim()) return;
+
+   
+
+
+    socket.emit(NEW_MESSAGE, {chatId, members, message})
+    setMessage("")
+  }
+  
+  return  chatDetails.isLoading ? (<Skeleton/>):(
     <>
       <Stack
         ref={containerRef}
@@ -45,6 +68,7 @@ const  Chat = () => {
         style={{
           height: "10%",
         }}
+        onSubmit={submitHandler}
       >
         <Stack direction={"row"} height={"100%"} padding={"1rem"} alignItems={"center"} position={"relative"}>
           <IconButton sx={{
@@ -56,7 +80,11 @@ const  Chat = () => {
           >
             <AttachFileIcon />
           </IconButton>
-          <InputBox placeholder="Type Message Here..." />
+          <InputBox 
+          placeholder="Type Message Here..." 
+            value={message}
+            onChange={(e)=> setMessage(e.target.value)}
+          />
           <IconButton type="submit" sx={{
             backgroundColor: orange,
             color: "white",

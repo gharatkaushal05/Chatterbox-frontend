@@ -20,48 +20,49 @@ import {
 import { useNavigate } from "react-router-dom";
 import { server } from "../../constants/config";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { userNotExists } from "../../redux/reducers/auth";
 import toast from "react-hot-toast";
+import { setIsMobile, setIsSearch } from "../../redux/reducers/misc";
+import { setIsNotification } from "../../redux/reducers/misc";
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationDialog = lazy(() => import("../specific/Notifications"));
 const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 const Header = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
-  const [isMobile, setIsMobile] = useState(false);
-  const [isSearch, setIsSearch] = useState(false);
+  const dispatch = useDispatch();
+
+  const { isSearch, isNotification } = useSelector((state) => state.misc);
+
   const [isNewGroup, setIsNewGroup] = useState(false);
-  const [isNotification, setIsNotification] = useState(false);
+  
+
   const handleMobile = () => {
-    setIsMobile((prev) => !prev);
+    dispatch(setIsMobile(true));
   };
   const openSearch = () => {
-    setIsSearch((prev) => !prev);
+    dispatch(setIsSearch(true));
   };
   const openNewGroup = () => {
     setIsNewGroup((prev) => !prev);
   };
 
-  const openNotification = () => {
-    setIsNotification((prev) => !prev);
-  };
+  const openNotification = () => dispatch(setIsNotification(true))
 
   const navigateToGroup = () => navigate("/groups");
-  
+
   const logoutHandler = async () => {
     try {
-      const {data} = await axios.get(`${server}/api/v1/user/logout`,{
-        withCredentials:true,
-      })
-      dispatch(userNotExists())
-      toast.success(data.message)
+      const { data } = await axios.get(`${server}/api/v1/user/logout`, {
+        withCredentials: true,
+      });
+      dispatch(userNotExists());
+      toast.success(data.message);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong")
-      
+      toast.error(error?.response?.data?.message || "Something went wrong");
     }
-  }
+  };
   return (
     <>
       <Box sx={{ flexGrow: 1 }} height={"4rem"}>
