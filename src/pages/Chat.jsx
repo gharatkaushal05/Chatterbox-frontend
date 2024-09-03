@@ -17,6 +17,7 @@ import { useErrors, useSocketEvents } from "../hooks/hook";
 import { useInfiniteScrollTop } from "6pp";
 import { useDispatch } from "react-redux";
 import { setIsFileMenu } from "../redux/reducers/misc";
+import { removeNewMessagesAlert } from "../redux/reducers/chat";
 
 
 const  Chat = ({chatId, user}) => {
@@ -69,10 +70,21 @@ const  Chat = ({chatId, user}) => {
     setMessage("")
   }
 
+  useEffect(()=> {
+  dispatch(removeNewMessagesAlert(chatId))
+  
+    return()=> {
+      setMessages([]);
+      setMessage("");
+      setOldMessages([]);
+      setPage(1)
+    }
+  },[chatId])
+
   const newMessagesHandler = useCallback((data)=> {
-    
+    if(data.chatId !== chatId) return;
     setMessages((prev)=> [...prev, data.message]);
-  },[])
+  },[chatId])
 
  const eventHandler = {[NEW_MESSAGE] : newMessagesHandler};
  useSocketEvents(socket, eventHandler)
