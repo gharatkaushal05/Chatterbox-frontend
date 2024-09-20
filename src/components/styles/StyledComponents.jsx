@@ -67,3 +67,4 @@ const bounceAnimation = keyframes`
 export const BouncingSkeleton = styled(Skeleton)(() => ({
   animation: `${bounceAnimation} 1s infinite`,
 }));
+ 
